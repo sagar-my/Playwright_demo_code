@@ -11,12 +11,12 @@ export default defineConfig({
   //reporter: 'html',
   reporter: [
   ['list'],
-  ['html'],
-  ['json', { outputFile: 'playwright-report/test-results.json' }],
-  ['allure-playwright']
+  ['html', { open: 'never' }],
+  ['json', { outputFile: 'test-results/test-results.json' }]
 ],
+
   use: {
-    headless: process.env.CI ? true : false,
+    headless: true,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

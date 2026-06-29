@@ -1,106 +1,271 @@
 const fs = require("fs");
+const path = require("path");
 const axios = require("axios");
 
-const webhook = process.env.TEAMS_WEBHOOK_URL;
+const webhookUrl = "https://default85707f27830a4b92aa8c3830bfb6c6.f5.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/45ed6cf3998b446b92b2479ade6bb385/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=jZouY04HqXShwIVIBzSlDture4kMYw-h81MyeXiKtRM"; // Add your Teams webhook URL here
 
-if (!webhook) {
-    console.error("❌ TEAMS_WEBHOOK_URL is missing.");
-    process.exit(1);
+if (!webhookUrl) {
+  console.error("❌ TEAMS_WEBHOOK_URL not set. Set env var or edit the script.");
+  process.exit(1);
 }
 
-const reportPath = "./playwright-report/test-results.json";
+const reportPath = path.resolve("./playwright-report/test-results.json");
 
 if (!fs.existsSync(reportPath)) {
-    console.error("❌ Playwright JSON report not found.");
-    process.exit(1);
+  console.error(`❌ JSON report not found at ${reportPath}`);
+  process.exit(1);
 }
 
-const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+const raw = fs.readFileSync(reportPath, "utf-8");
 
-let total = 0;
-let passed = 0;
-let failed = 0;
-let skipped = 0;
+let report;
+try {
+  report = JSON.parse(raw);
+} catch (err) {
+  console.error("❌ Invalid JSON in report file. Aborting.");
+  console.error(err);
+  process.exit(1);
+}
 
-let details = "";
+// Helper function
+const get = (obj, pathArr, fallback = undefined) => {
+  let cur = obj;
+  for (const p of pathArr) {
+    if (cur == null) return fallback;
+    cur = cur[p];
+  }
+  return cur ?? fallback;
+};
 
-function parseSuites(suites) {
-    for (const suite of suites) {
+const DEFAULT_BROWSER =
+  process.env.TEST_BROWSER ||
+  process.env.BROWSER ||
+  "Chromium";
 
-        if (suite.suites && suite.suites.length) {
-            parseSuites(suite.suites);
-        }
+// Collect tests
+const collected = [];
 
-        if (!suite.specs) continue;
+function traverse(obj) {
+  if (!obj || typeof obj !== "object") return;
 
-        for (const spec of suite.specs) {
+  const maybeTitle =
+    obj.title ??
+    obj.name ??
+    obj.testTitle ??
+    undefined;
 
-            const title = spec.title;
-            const file = spec.file || "";
+  const maybeStatus = (
+    obj.status ??
+    (obj.ok === true
+      ? "passed"
+      : obj.ok === false
+      ? "failed"
+      : undefined)
+  )
+    ?.toString()
+    ?.toLowerCase();
 
-            for (const test of spec.tests) {
+  if (
+    typeof maybeTitle === "string" &&
+    typeof maybeStatus === "string"
+  ) {
+    let id;
 
-                total++;
+    const idMatch = maybeTitle.match(
+      /(TC[-_\s]?\d{2,6}|ID[-_:]?\d{2,6})/i
+    );
 
-                const result = test.results[0] || {};
+    if (idMatch) id = idMatch[0];
 
-                const duration =
-                    ((result.duration || 0) / 1000).toFixed(2);
+    const file =
+      obj.location?.file ??
+      obj.file ??
+      obj.url ??
+      undefined;
 
-                const browser =
-                    test.projectName || "Chromium";
+    let browser =
+      get(obj, ["project", "name"]) ??
+      obj.projectName ??
+      undefined;
 
-                let status = result.status || test.status;
+    if (!browser) {
+      const topProject =
+        get(report, ["project", "name"]) ??
+        get(report, ["projects", "0", "name"]);
 
-                if (status === "passed")
-                    passed++;
-
-                else if (status === "failed")
-                    failed++;
-
-                else
-                    skipped++;
-
-                const icon =
-                    status === "passed"
-                        ? "✅"
-                        : status === "failed"
-                        ? "❌"
-                        : "⏭";
-
-                details +=
-`• ${title}
-  📄 File : ${file},🌐 Browser  : ${browser},⏱ Duration : ${duration}s${icon} Status   : ${status}
-`;
-            }
-        }
+      if (topProject) browser = topProject;
     }
+
+    if (!browser) browser = DEFAULT_BROWSER;
+
+    collected.push({
+      id,
+      name: maybeTitle,
+      file,
+      browser,
+      status: maybeStatus,
+    });
+
+    return;
+  }
+
+  if (Array.isArray(obj.tests) && obj.tests.length) {
+    obj.tests.forEach(traverse);
+    return;
+  }
+
+  if (Array.isArray(obj)) {
+    obj.forEach(traverse);
+    return;
+  }
+
+  Object.values(obj).forEach(traverse);
 }
 
-parseSuites(report.suites);
+traverse(report);
 
-const message =
-`🚀 Playwright Automation Execution 
-📊 Test Summary
-──────────────────────────────
-📦 Total Tests : ${total} ✅ Passed : ${passed} ❌ Failed : ${failed} ⏭ Skipped : ${skipped}
-──────────────────────────────
-${details}
-──────────────────────────────
-Repository : ${process.env.GITHUB_REPOSITORY}
-Branch : ${process.env.GITHUB_REF_NAME}
-Run :
-https://github.com/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}
-`;
+// Fallback for Playwright JSON format
+if (collected.length === 0) {
+  const suites = report.suites ?? report;
 
-axios
-    .post(webhook, {
-        text: message
-    })
-    .then(() => {
-        console.log("✅ Teams notification sent.");
-    })
-    .catch(err => {
-        console.error(err.response?.data || err.message);
-        process.exit(1);
-    });
+  function walkSuites(s) {
+    if (!s) return;
+
+    if (Array.isArray(s)) {
+      s.forEach(walkSuites);
+      return;
+    }
+
+    if (s.specs) {
+      s.specs.forEach((spec) => {
+        if (spec.tests) {
+          spec.tests.forEach((t) => {
+            const title = t.title ?? t.name;
+
+            const status = (
+              t.status ??
+              (t.ok ? "passed" : "failed")
+            )
+              ?.toString()
+              ?.toLowerCase();
+
+            if (title && status) {
+              collected.push({
+                id:
+                  (
+                    title.match(
+                      /(TC[-_\s]?\d{2,6}|ID[-_:]?\d{2,6})/i
+                    ) || []
+                  )[0],
+                name: title,
+                file: spec.file ?? t.file,
+                browser:
+                  get(t, ["project", "name"]) ??
+                  DEFAULT_BROWSER,
+                status,
+              });
+            }
+          });
+        }
+
+        if (spec.suites) {
+          walkSuites(spec.suites);
+        }
+      });
+    }
+  }
+
+  walkSuites(suites);
+}
+
+// Summary
+const total = collected.length;
+const passed = collected.filter(
+  (t) => t.status === "passed"
+).length;
+
+const failed = collected.filter(
+  (t) => t.status === "failed"
+).length;
+
+const skipped = collected.filter(
+  (t) => t.status === "skipped"
+).length;
+
+// Teams Message
+const MAX_LINES = 50;
+
+const lines = collected
+  .slice(0, MAX_LINES)
+  .map((t) => {
+    const idPart = t.id ? `**${t.id}** • ` : "";
+    const filePart = t.file
+      ? ` (_${path.basename(t.file)}_)`
+      : "";
+
+    const browserPart = t.browser
+      ? ` • Browser: **${t.browser}**`
+      : "";
+
+    const statusPart = t.status
+      ? ` • Status: **${
+          t.status.charAt(0).toUpperCase() +
+          t.status.slice(1)
+        }**`
+      : "";
+
+    return `- ${idPart}${t.name}${filePart}${envPart}${browserPart}${statusPart}`;
+  });
+
+const moreNote =
+  total > MAX_LINES
+    ? `\n\n_...and ${
+        total - MAX_LINES
+      } more tests omitted in this message._`
+    : "";
+
+const payload = {
+  "@type": "MessageCard",
+  "@context": "https://schema.org/extensions",
+  summary: "Automation Execution Report",
+  themeColor: failed > 0 ? "FF0000" : "00C853",
+  title:
+    failed > 0
+      ? `❌ Automation Execution — ${failed} failed`
+      : `✅ Automation Execution — All Passed (${passed}/${total})`,
+  sections: [
+    {
+      activityTitle: `Total: **${total}** • Passed: **${passed}** • Failed: **${failed}** • Skipped: **${skipped}**`,
+      text: lines.length
+        ? lines.join("\n") + moreNote
+        : "_No tests found in JSON report_",
+      markdown: true,
+    },
+  ],
+};
+
+// Send to Teams
+(async () => {
+  try {
+    const res = await axios.post(
+      webhookUrl,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log(
+      "✅ Sent summary to Teams:",
+      res.status
+    );
+  } catch (err) {
+    console.error(
+      "❌ Error sending message to Teams:",
+      err.response?.status,
+      err.response?.data || err.message
+    );
+  }
+})();
