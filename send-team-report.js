@@ -9,7 +9,7 @@ if (!webhookUrl) {
   process.exit(1);
 }
 
-const reportPath = path.resolve("./playwright-report/test-results.json");
+const reportPath = path.resolve("./test-results/test-results.json");
 
 if (!fs.existsSync(reportPath)) {
   console.error(`❌ JSON report not found at ${reportPath}`);
