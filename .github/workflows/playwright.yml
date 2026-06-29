@@ -36,7 +36,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Execute Playwright Tests
-        run: npm test
+        run: npm test:login
 
       - name: Generate Allure Report
         if: always()
@@ -67,4 +67,4 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_REF_NAME: ${{ github.ref_name }}
           GITHUB_RUN_ID: ${{ github.run_id }}
-        run: node scripts/send-team-report.js
+        run: node send-team-report.js
