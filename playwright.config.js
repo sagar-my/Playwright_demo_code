@@ -16,7 +16,7 @@ export default defineConfig({
   ['allure-playwright']
 ],
   use: {
-      headless: false,          
+    headless: process.env.CI ? true : false,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

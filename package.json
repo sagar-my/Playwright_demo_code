@@ -9,6 +9,7 @@
     "allure:generate": "allure generate allure-results --output allure-report --clean",
     "allure:open": "allure open ./allure-report",
     "test:login": "npx playwright test tests/loginTests.spec.js",
+    "test:login:headed": "npx playwright test tests/loginTests.spec.js --headed",
     "test:cart": "npx playwright test tests/cartTests.spec.js",
     "test:checkout": "npx playwright test tests/checkoutTests.spec.js",
     "test:product": "npx playwright test tests/productTests.spec.js",
