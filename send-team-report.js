@@ -214,7 +214,7 @@ const lines = collected
         }**`
       : "";
 
-    return `- ${idPart}${t.name}${filePart}${envPart}${browserPart}${statusPart}`;
+    return `- ${idPart}${t.name}${filePart}${browserPart}${statusPart}`;
   });
 
 const moreNote =
