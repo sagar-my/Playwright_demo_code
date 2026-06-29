@@ -6,7 +6,7 @@
     "test:headed": "npx playwright test --headed",
     "test:report": "npx playwright show-report",
     "test:single": "npx playwright test tests/example.spec.js",
-    "allure:generate": "allure generate ./allure-results -o ./allure-report --clean",
+    "allure:generate": "allure generate allure-results --output allure-report --clean",
     "allure:open": "allure open ./allure-report",
     "test:login": "npx playwright test tests/loginTests.spec.js",
     "test:cart": "npx playwright test tests/cartTests.spec.js",
@@ -15,7 +15,7 @@
     "test:logout": "npx playwright test tests/logoutTests.spec.js",
     "test:endtoend": "npx playwright test tests/endToEndTests.spec.js"
   },
-  
+
   "devDependencies": {
     "@playwright/test": "^1.49.0",
     "allure": "^3.12.0",

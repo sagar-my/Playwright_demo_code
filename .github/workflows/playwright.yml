@@ -36,7 +36,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Execute Playwright Tests
-        run: npm test:login
+        run: npm run test:login
 
       - name: Generate Allure Report
         if: always()
