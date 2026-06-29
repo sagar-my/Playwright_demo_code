@@ -1,6 +1,0 @@
-"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","3638","TC006: Login with empty username","chromium","2026-06-25","passed","2026-06-25","Login Tests - Negative Scenarios","loginTests.spec.js","",""
-"","4002","TC007: Login with empty password","chromium","2026-06-25","passed","2026-06-25","Login Tests - Negative Scenarios","loginTests.spec.js","",""
-"","4011","TC005: Login with invalid password","chromium","2026-06-25","passed","2026-06-25","Login Tests - Negative Scenarios","loginTests.spec.js","",""
-"","5141","TC001: Login with valid credentials - standard_user","chromium","2026-06-25","passed","2026-06-25","Login Tests - Positive Scenarios","loginTests.spec.js","",""
-"","6062","TC004: Login with invalid username","chromium","2026-06-25","passed","2026-06-25","Login Tests - Negative Scenarios","loginTests.spec.js","",""
