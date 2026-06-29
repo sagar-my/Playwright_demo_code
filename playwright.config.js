@@ -9,10 +9,12 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   //reporter: 'html',
-   reporter: [
-    ['list'],
-    ['allure-playwright']
-  ],
+  reporter: [
+  ['list'],
+  ['html'],
+  ['json', { outputFile: 'playwright-report/test-results.json' }],
+  ['allure-playwright']
+],
   use: {
       headless: false,          
     trace: 'on-first-retry',
