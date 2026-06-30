@@ -16,7 +16,7 @@ exports.Products = class Products extends base_obj {
         this.productPrices = page.locator('.inventory_item_price');
         this.addToCartButtons = page.locator('button[data-test*="add-to-cart"]');
         this.removeButtons = page.locator('button[data-test*="remove"]');
-        
+        this.backToProductsBtn = page.locator('//*[@id="back-to-products"]');
         // Cart
         this.cart_icon = page.locator('//a[@data-test="shopping-cart-link"]');
         this.cart_badge = page.locator('//span[@data-test="shopping-cart-badge"]');
@@ -60,6 +60,10 @@ exports.Products = class Products extends base_obj {
         await expect(this.cart_badge).toHaveText(count.toString());
     }
 
+    async clickBackToProducts() {
+    await this.backToProductsBtn.click();
+  }
+
     async change_ProductSorting(optionval) {
         await this.product_sort.selectOption(optionval);
     }
@@ -91,21 +95,29 @@ exports.Products = class Products extends base_obj {
 
     async addProductToCart(productName) {
         const product = this.page.locator(`//div[text()="${productName}"]/ancestor::div[@class="inventory_item"]//button`);
+        console.log(`Adding product to cart: ${productName}`);
         await product.click();
     }
 
     async removeProductFromCart(productName) {
         const product = this.page.locator(`//div[text()="${productName}"]/ancestor::div[@class="inventory_item"]//button`);
+        console.log(`Removing product from cart: ${productName}`);
         await product.click();
-    }
+        }
 
     async clickProductByName(productName) {
         await this.page.locator(`//div[text()="${productName}"]`).click();
+        console.log(`Clicked on product: ${productName}`);
+    }
+
+    async addtocartbutton(){
+        await this.addToCartButtons.first().click();
     }
 
     async getProductCount() {
         const count = await this.cart_badge.textContent().catch(() => null);
-        return count ? parseInt(count) : 0;
+        console.log("Product count in cart:", count);
+         return count ? parseInt(count) : 0;
     }
 
     async isCartBadgeVisible() {

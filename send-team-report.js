@@ -193,7 +193,7 @@ const skipped = collected.filter(
 ).length;
 
 // Teams Message
-const MAX_LINES = 50;
+const MAX_LINES = 100;
 
 const lines = collected
   .slice(0, MAX_LINES)

@@ -2,6 +2,8 @@ import { test, expect } from '@playwright/test';
 import { CartPage } from '../pages/cartPage';
 import { LoginPage } from '../pages/loginPage';
 import { data } from '../data';
+import { Products } from '../pages/productPage';
+import { base_obj } from '../pages/baseClass';
 
 test.describe('Cart Tests - Positive Scenarios', () => {
     test.beforeEach(async ({ page }) => {
@@ -12,13 +14,15 @@ test.describe('Cart Tests - Positive Scenarios', () => {
 
     test('TC039: Navigate to cart page', async ({ page }) => {
         const cartPage = new CartPage(page);
-        await cartPage.clickCartIcon();
+        const productsPage = new Products(page);
+        await productsPage.clickCartIcon();
         await cartPage.validate_cart_page_title();
     });
 
     test('TC040: Verify empty cart page', async ({ page }) => {
         const cartPage = new CartPage(page);
-        await cartPage.clickCartIcon();
+        const productsPage = new Products(page);
+        await productsPage.clickCartIcon();
         await cartPage.validate_cart_page_title();
         const itemCount = await cartPage.getCartItemCount();
         expect(itemCount).toBe(0);
@@ -26,8 +30,10 @@ test.describe('Cart Tests - Positive Scenarios', () => {
 
     test('TC041: Add product and verify in cart', async ({ page }) => {
         const cartPage = new CartPage(page);
-        await cartPage.clickProductByName(data.product1_name);
-        await cartPage.clickCartIcon();
+        const productsPage = new Products(page);
+        await productsPage.clickProductByName(data.product1_name);
+        await productsPage.addtocartbutton();
+        await productsPage.clickCartIcon();
         await cartPage.validate_cart_page_title();
         const isInCart = await cartPage.isItemInCart(data.product1_name);
         expect(isInCart).toBe(true);
@@ -35,10 +41,17 @@ test.describe('Cart Tests - Positive Scenarios', () => {
 
     test('TC042: Add multiple products and verify all in cart', async ({ page }) => {
         const cartPage = new CartPage(page);
-        await cartPage.clickProductByName(data.product1_name);
-        await cartPage.clickProductByName(data.product2_name);
-        await cartPage.clickProductByName(data.product3_name);
-        await cartPage.clickCartIcon();
+        const productsPage = new Products(page);
+        await productsPage.clickProductByName(data.product1_name);
+        await productsPage.addtocartbutton();
+        await productsPage.clickBackToProducts();
+        await productsPage.clickProductByName(data.product2_name);
+        await productsPage.addtocartbutton();
+        await productsPage.clickBackToProducts();
+        await productsPage.clickProductByName(data.product3_name);
+        await productsPage.addtocartbutton();
+        await productsPage.clickBackToProducts();
+        await productsPage.clickCartIcon();
         await cartPage.validate_cart_page_title();
         expect(await cartPage.isItemInCart(data.product1_name)).toBe(true);
         expect(await cartPage.isItemInCart(data.product2_name)).toBe(true);
@@ -47,9 +60,14 @@ test.describe('Cart Tests - Positive Scenarios', () => {
 
     test('TC043: Remove product from cart page', async ({ page }) => {
         const cartPage = new CartPage(page);
-        await cartPage.clickProductByName(data.product1_name);
-        await cartPage.clickProductByName(data.product2_name);
-        await cartPage.clickCartIcon();
+        const productsPage = new Products(page);
+        await productsPage.clickProductByName(data.product1_name);
+        await productsPage.addtocartbutton();
+        await productsPage.clickBackToProducts();
+        await productsPage.clickProductByName(data.product2_name);
+        await productsPage.addtocartbutton();
+        await productsPage.clickBackToProducts();
+        await productsPage.clickCartIcon();
         await cartPage.removeItemByName(data.product1_name);
         expect(await cartPage.isItemInCart(data.product1_name)).toBe(false);
         expect(await cartPage.isItemInCart(data.product2_name)).toBe(true);
@@ -57,10 +75,17 @@ test.describe('Cart Tests - Positive Scenarios', () => {
 
     test('TC044: Remove all products from cart', async ({ page }) => {
         const cartPage = new CartPage(page);
-        await cartPage.clickProductByName(data.product1_name);
-        await cartPage.clickProductByName(data.product2_name);
-        await cartPage.clickProductByName(data.product3_name);
-        await cartPage.clickCartIcon();
+        const productsPage = new Products(page);
+        await productsPage.clickProductByName(data.product1_name);
+        await productsPage.addtocartbutton();
+        await productsPage.clickBackToProducts();
+        await productsPage.clickProductByName(data.product2_name);
+        await productsPage.addtocartbutton();
+        await productsPage.clickBackToProducts();
+        await productsPage.clickProductByName(data.product3_name);
+        await productsPage.addtocartbutton();
+        await productsPage.clickBackToProducts();
+        await productsPage.clickCartIcon();
         await cartPage.removeItemByName(data.product1_name);
         await cartPage.removeItemByName(data.product2_name);
         await cartPage.removeItemByName(data.product3_name);
@@ -70,24 +95,34 @@ test.describe('Cart Tests - Positive Scenarios', () => {
 
     test('TC045: Continue shopping from cart page', async ({ page }) => {
         const cartPage = new CartPage(page);
-        await cartPage.clickCartIcon();
+        const productsPage = new Products(page);
+        const basePage = new base_obj(page);
+        await productsPage.clickCartIcon();
         await cartPage.click_continueShopping();
-        await cartPage.validate_product_page();
+        await basePage.validate_product_page();
     });
 
     test('TC046: Verify cart badge count matches items in cart', async ({ page }) => {
         const cartPage = new CartPage(page);
+        const productsPage = new Products(page);
         await cartPage.clickProductByName(data.product1_name);
+        await productsPage.addtocartbutton();
+        await productsPage.clickBackToProducts();
         await cartPage.clickProductByName(data.product2_name);
+        await productsPage.addtocartbutton();
+        await productsPage.clickBackToProducts();
         const badgeCount = await cartPage.getProductCount();
         await cartPage.clickCartIcon();
         const cartItemCount = await cartPage.getCartItemCount();
         expect(badgeCount).toBe(cartItemCount);
+        console.log(`Cart badge count: ${badgeCount}, Cart item count: ${cartItemCount}`);
     });
 
     test('TC047: Verify checkout button is enabled when cart has items', async ({ page }) => {
         const cartPage = new CartPage(page);
-        await cartPage.clickProductByName(data.product1_name);
+        const productsPage = new Products(page);
+        await productsPage.clickProductByName(data.product1_name);
+        await productsPage.addtocartbutton();
         await cartPage.clickCartIcon();
         const isEnabled = await cartPage.isCheckoutButtonEnabled();
         expect(isEnabled).toBe(true);
@@ -95,11 +130,14 @@ test.describe('Cart Tests - Positive Scenarios', () => {
 
     test('TC048: Verify product names and prices in cart', async ({ page }) => {
         const cartPage = new CartPage(page);
-        await cartPage.clickProductByName(data.product1_name);
+        const productsPage = new Products(page);
+        await productsPage.clickProductByName(data.product1_name);
+        await productsPage.addtocartbutton();
         await cartPage.clickCartIcon();
         const itemNames = await cartPage.getCartItemNames();
         expect(itemNames.length).toBeGreaterThan(0);
         expect(itemNames).toContain(data.product1_name);
+        console.log(`Items in cart: ${itemNames} matching expected product: ${data.product1_name}`);
     });
 });
 
@@ -115,6 +153,7 @@ test.describe('Cart Tests - Negative Scenarios', () => {
         await cartPage.clickCartIcon();
         const itemCount = await cartPage.getCartItemCount();
         expect(itemCount).toBe(0);
+        console.log("Cart is empty, item count:", itemCount);
         // Checkout button should still be visible but cart should be empty
         await expect(cartPage.checkout_button).toBeVisible();
     });
@@ -132,10 +171,15 @@ test.describe('Cart Tests - Negative Scenarios', () => {
     test('TC051: Verify cart persists after page refresh', async ({ page }) => {
         const cartPage = new CartPage(page);
         await cartPage.clickProductByName(data.product1_name);
+        await cartPage.addtocartbutton();
+        await cartPage.clickBackToProducts();
         await cartPage.clickProductByName(data.product2_name);
+        await cartPage.addtocartbutton();
+        await cartPage.clickBackToProducts();  
         await page.reload();
         const cartCount = await cartPage.getProductCount();
         expect(cartCount).toBe(2);
+        console.log(`Cart count after page refresh: ${cartCount} match expected count of 2`);
     });
 });
 

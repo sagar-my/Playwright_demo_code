@@ -28,8 +28,10 @@ exports.CartPage = class CartPage extends Products {
     }
 
     async getCartItemCount() {
-        return await this.cartItems.count();
-    }
+    const count = await this.cartItems.count();
+    console.log("Number of items in cart:", count);
+    return count;
+}
 
     async removeItemByIndex(index) {
         const removeButtons = await this.removeButtons.all();
@@ -47,10 +49,12 @@ exports.CartPage = class CartPage extends Products {
         return await this.cartItemNames.allTextContents();
     }
 
-    async isItemInCart(itemName) {
-        const names = await this.getCartItemNames();
-        return names.includes(itemName);
-    }
+   async isItemInCart(itemName) {
+    const names = await this.getCartItemNames();
+    console.log("Items in cart:", names);
+    console.log(`Is "${itemName}" in cart?`, names.includes(itemName));
+    return names.includes(itemName);
+}
 
     async validateCartIsEmpty() {
         await expect(this.cartItems.first()).toBeHidden().catch(() => {});
