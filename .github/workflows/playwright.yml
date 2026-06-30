@@ -31,7 +31,7 @@ jobs:
       - run: npx playwright install --with-deps
 
       - name: Execute Playwright Tests
-        run: npm test:cart
+        run: npm run test:cart
 
       - name: Verify JSON Report
         if: always()
