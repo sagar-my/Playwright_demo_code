@@ -1,7 +1,7 @@
-const { expect } = require("@playwright/test");
-const { CartPage } = require("./cartPage");
+import { expect } from '@playwright/test';
+import { CartPage } from './cartPage.js';
 
-exports.CheckoutInformationPage = class CheckoutInformationPage extends CartPage {
+export class CheckoutInformationPage extends CartPage {
     constructor(page) {
         super(page);
         this.firstName_field = page.locator('//input[@data-test="firstName"]');
@@ -52,15 +52,15 @@ exports.CheckoutInformationPage = class CheckoutInformationPage extends CartPage
     }
 
     async clearFirstName() {
-        await this.firstName_field.clear();
+        await this.firstName_field.fill('');
     }
 
     async clearLastName() {
-        await this.lastName_field.clear();
+        await this.lastName_field.fill('');
     }
 
     async clearPostalCode() {
-        await this.postalCode_field.clear();
+        await this.postalCode_field.fill('');
     }
 
     async isContinueButtonEnabled() {

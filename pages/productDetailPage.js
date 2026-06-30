@@ -1,7 +1,7 @@
-const { expect } = require("@playwright/test");
-const { Products } = require("./productPage");
+import { expect } from '@playwright/test';
+import { Products } from './productPage.js';
 
-exports.ProductDetailPage = class ProductDetailPage extends Products {
+export class ProductDetailPage extends Products {
     constructor(page) {
         super(page);
         this.backToProducts = page.locator('//button[@data-test="back-to-products"]');

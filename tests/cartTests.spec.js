@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { CartPage } from '../pages/cartPage';
-import { LoginPage } from '../pages/loginPage';
-import { data } from '../data';
-import { Products } from '../pages/productPage';
-import { base_obj } from '../pages/baseClass';
+import { CartPage } from '../pages/cartPage.js';
+import { LoginPage } from '../pages/loginPage.js';
+import { data } from '../data.js';
+import { Products } from '../pages/productPage.js';
+import { BasePage } from '../pages/baseClass.js';
 
 test.describe('Cart Tests - Positive Scenarios', () => {
     test.beforeEach(async ({ page }) => {
@@ -96,7 +96,7 @@ test.describe('Cart Tests - Positive Scenarios', () => {
     test('TC045: Continue shopping from cart page', async ({ page }) => {
         const cartPage = new CartPage(page);
         const productsPage = new Products(page);
-        const basePage = new base_obj(page);
+        const basePage = new BasePage(page);
         await productsPage.clickCartIcon();
         await cartPage.click_continueShopping();
         await basePage.validate_product_page();

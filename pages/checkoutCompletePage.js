@@ -1,7 +1,7 @@
-const { expect } = require("@playwright/test");
-const { CheckoutOverviewPage } = require("./checkoutOverviewPage");
+import { expect } from '@playwright/test';
+import { CheckoutOverviewPage } from './checkoutOverviewPage.js';
 
-exports.CheckoutCompletePage = class CheckoutCompletePage extends CheckoutOverviewPage {
+export class CheckoutCompletePage extends CheckoutOverviewPage {
     constructor(page) {
         super(page);
         this.complete_page_title = page.locator('//span[text()="Checkout: Complete!"]');

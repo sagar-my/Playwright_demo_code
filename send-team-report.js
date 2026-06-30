@@ -1,6 +1,6 @@
-const fs = require("fs");
-const path = require("path");
-const axios = require("axios");
+import fs from "fs";
+import path from "path";
+import axios from "axios";
 
 const webhookUrl = "https://default85707f27830a4b92aa8c3830bfb6c6.f5.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/45ed6cf3998b446b92b2479ade6bb385/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=jZouY04HqXShwIVIBzSlDture4kMYw-h81MyeXiKtRM"; // Add your Teams webhook URL here
 
@@ -122,59 +122,58 @@ function traverse(obj) {
   Object.values(obj).forEach(traverse);
 }
 
+function walkSuites(s) {
+  if (!s) return;
+
+  if (Array.isArray(s)) {
+    s.forEach(walkSuites);
+    return;
+  }
+
+  if (s.specs) {
+    s.specs.forEach((spec) => {
+      if (spec.tests) {
+        spec.tests.forEach((t) => {
+          const title = t.title ?? t.name;
+
+          const status = (
+            t.status ??
+            (t.ok ? 'passed' : 'failed')
+          )
+            ?.toString()
+            ?.toLowerCase();
+
+          if (title && status) {
+            collected.push({
+              id:
+                (
+                  title.match(
+                    /(TC[-_\s]?\d{2,6}|ID[-_:]?\d{2,6})/i
+                  ) || []
+                )[0],
+              name: title,
+              file: spec.file ?? t.file,
+              browser:
+                get(t, ['project', 'name']) ??
+                DEFAULT_BROWSER,
+              status,
+            });
+          }
+        });
+      }
+
+      if (spec.suites) {
+        walkSuites(spec.suites);
+      }
+    });
+  }
+}
+
 traverse(report);
 
 // Fallback for Playwright JSON format
 if (collected.length === 0) {
   const suites = report.suites ?? report;
-
-  function walkSuites(s) {
-    if (!s) return;
-
-    if (Array.isArray(s)) {
-      s.forEach(walkSuites);
-      return;
-    }
-
-    if (s.specs) {
-      s.specs.forEach((spec) => {
-        if (spec.tests) {
-          spec.tests.forEach((t) => {
-            const title = t.title ?? t.name;
-
-            const status = (
-              t.status ??
-              (t.ok ? "passed" : "failed")
-            )
-              ?.toString()
-              ?.toLowerCase();
-
-            if (title && status) {
-              collected.push({
-                id:
-                  (
-                    title.match(
-                      /(TC[-_\s]?\d{2,6}|ID[-_:]?\d{2,6})/i
-                    ) || []
-                  )[0],
-                name: title,
-                file: spec.file ?? t.file,
-                browser:
-                  get(t, ["project", "name"]) ??
-                  DEFAULT_BROWSER,
-                status,
-              });
-            }
-          });
-        }
-
-        if (spec.suites) {
-          walkSuites(spec.suites);
-        }
-      });
-    }
-  }
-
   walkSuites(suites);
 }
 

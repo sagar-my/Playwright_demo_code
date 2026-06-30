@@ -1,7 +1,7 @@
-const { expect } = require("@playwright/test");
-const { Products } = require("./productPage");
+import { expect } from '@playwright/test';
+import { Products } from './productPage.js';
 
-exports.CartPage = class CartPage extends Products {
+export class CartPage extends Products {
     constructor(page) {
         super(page);
         this.cart_page_title = page.locator('//span[text()="Your Cart"]');
@@ -51,13 +51,13 @@ exports.CartPage = class CartPage extends Products {
 
    async isItemInCart(itemName) {
     const names = await this.getCartItemNames();
-    console.log("Items in cart:", names);
+    console.log('Items in cart:', names);
     console.log(`Is "${itemName}" in cart?`, names.includes(itemName));
     return names.includes(itemName);
 }
 
     async validateCartIsEmpty() {
-        await expect(this.cartItems.first()).toBeHidden().catch(() => {});
+        await expect(this.cartItems).toHaveCount(0);
     }
 
     async isCheckoutButtonEnabled() {

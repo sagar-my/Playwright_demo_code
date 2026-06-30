@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { Products } from '../pages/productPage';
-import { LoginPage } from '../pages/loginPage';
-import { data } from '../data';
+import { Products } from '../pages/productPage.js';
+import { LoginPage } from '../pages/loginPage.js';
+import { data } from '../data.js';
 
 test.describe('Logout Tests', () => {
     test.beforeEach(async ({ page }) => {
@@ -49,14 +49,11 @@ test.describe('Logout Tests', () => {
         // Clear browser storage to ensure cart is cleared (SauceDemo persists cart in storage)
         await page.context().clearCookies();
         await page.evaluate(() => {
-            localStorage.clear();
-            sessionStorage.clear();
+            globalThis.localStorage.clear();
+            globalThis.sessionStorage.clear();
         });
         await loginPage.login();
-        // Wait for products page to load after login
         await products.validate_product_page();
-        // Wait a bit for cart state to update
-        await page.waitForTimeout(1000);
         const cartCount = await products.getProductCount();
         expect(cartCount).toBe(0);
     });

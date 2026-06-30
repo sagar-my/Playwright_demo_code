@@ -1,4 +1,4 @@
-exports.data = {
+export const data = {
     // Valid credentials - standard_user only
     correct_user: 'standard_user',
     correct_password: 'secret_sauce',

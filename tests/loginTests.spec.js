@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/loginPage';
-import { data } from '../data';
+import { LoginPage } from '../pages/loginPage.js';
+import { data } from '../data.js';
 
 test.describe('Login Tests - Positive Scenarios', () => {
     test('TC001: Login with valid credentials - standard_user', async ({ page }) => {

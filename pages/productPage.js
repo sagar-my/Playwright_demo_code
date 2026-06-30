@@ -1,7 +1,7 @@
-const { expect } = require("@playwright/test");
-const { base_obj } = require("./baseClass");
+import { expect } from '@playwright/test';
+import { BasePage } from './baseClass.js';
 
-exports.Products = class Products extends base_obj {
+export class Products extends BasePage {
     constructor(page) {
         super(page);
         // Product buttons

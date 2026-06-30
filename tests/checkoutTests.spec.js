@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { CheckoutInformationPage } from '../pages/checkoutInformationPage';
-import { CheckoutOverviewPage } from '../pages/checkoutOverviewPage';
-import { CheckoutCompletePage } from '../pages/checkoutCompletePage';
-import { LoginPage } from '../pages/loginPage';
-import { data } from '../data';
+import { CheckoutInformationPage } from '../pages/checkoutInformationPage.js';
+import { CheckoutOverviewPage } from '../pages/checkoutOverviewPage.js';
+import { CheckoutCompletePage } from '../pages/checkoutCompletePage.js';
+import { LoginPage } from '../pages/loginPage.js';
+import { data } from '../data.js';
 
 test.describe('Checkout Tests - Positive Scenarios', () => {
     test.beforeEach(async ({ page }) => {

@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { CheckoutCompletePage } from '../pages/checkoutCompletePage';
-import { LoginPage } from '../pages/loginPage';
-import { data } from '../data';
+import { CheckoutCompletePage } from '../pages/checkoutCompletePage.js';
+import { LoginPage } from '../pages/loginPage.js';
+import { data } from '../data.js';
 
 test.describe('End-to-End Tests - Complete User Journeys', () => {
     test('TC071: Complete purchase flow - Single product', async ({ page }) => {

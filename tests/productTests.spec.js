@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { Products } from '../pages/productPage';
-import { ProductDetailPage } from '../pages/productDetailPage';
-import { LoginPage } from '../pages/loginPage';
-import { data } from '../data';
+import { Products } from '../pages/productPage.js';
+import { ProductDetailPage } from '../pages/productDetailPage.js';
+import { LoginPage } from '../pages/loginPage.js';
+import { data } from '../data.js';
 
 test.describe('Product Tests - Positive Scenarios', () => {
     test.beforeEach(async ({ page }) => {

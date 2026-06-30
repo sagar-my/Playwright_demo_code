@@ -1,7 +1,7 @@
-const { expect } = require("@playwright/test");
-const { data } = require("../data");
+import { expect } from '@playwright/test';
+import { data } from '../data.js';
 
-exports.LoginPage = class LoginPage {
+export class LoginPage {
     constructor(page) {
         this.page = page;
         this.username_field = page.locator('[data-test="username"]');
@@ -47,11 +47,13 @@ exports.LoginPage = class LoginPage {
     }
 
     async clearUsername() {
-        await this.username_field.clear();
+        // Playwright Locator does not have clear(); use fill('') to clear the field
+        await this.username_field.fill('');
     }
 
     async clearPassword() {
-        await this.password_field.clear();
+        // Playwright Locator does not have clear(); use fill('') to clear the field
+        await this.password_field.fill('');
     }
 
     async isLoginButtonEnabled() {
